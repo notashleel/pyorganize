@@ -107,7 +107,7 @@ def main():
         printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
         print('-' * terminal_size)
         print()
-        printCenter(f'{BOLD}Progress:{END} |{progress_bar}| {percentage}%'.center(terminal_size))
+        printCenter(f'{BOLD}Progress:{END} |{progress_bar}| {int(percentage)}%'.center(terminal_size))
         print()
         printCenter(f'{UNDERLINE}{Fore.CYAN}Press {BOLD}↑ and ↓ arrow keys{END}{UNDERLINE}{Fore.CYAN} to go navigate through the menu{Fore.RESET}{END}'.center(terminal_size))
         print()
