@@ -3,6 +3,7 @@ import os
 import shutil
 from colorama import Fore, Style
 from msvcrt import getch
+import re
 
 def initialize_database():
     conn = sqlite3.connect('todo.db')
@@ -77,6 +78,14 @@ def display_tasks():
     for task in tasks:
         print(f"{task[0]}. {task[1]} [{task[2]}]")
 
+def visible_length(text):
+    return len(re.sub(r'\x1B[@-_][0-?]*[ -/]*[@-~]', '', text))
+
+def printCenter(text):
+    terminal_size = shutil.get_terminal_size().columns
+    padding = (terminal_size - visible_length(text)) // 2
+    print(' ' * padding + text)
+
 def main():
     initialize_database()
     current_choice = 1
@@ -94,13 +103,13 @@ def main():
         progress_bar = "█" * int(percentage / 2)
         progress_bar = f'{Fore.LIGHTBLUE_EX}{progress_bar}{Fore.RESET}'
         progress_bar += " " * (50 - int(percentage / 2))
-        print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-        print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+        printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}")
+        printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
         print('-' * terminal_size)
         print()
-        print(f'{BOLD}Progress:{END} |{progress_bar}| {percentage}%'.center(terminal_size))
+        printCenter(f'{BOLD}Progress:{END} |{progress_bar}| {percentage}%'.center(terminal_size))
         print()
-        print(f'{UNDERLINE}{Fore.CYAN}Press {BOLD}↑ and ↓ arrow keys{END}{UNDERLINE}{Fore.CYAN} to go navigate through the menu{Fore.RESET}{END}'.center(terminal_size))
+        printCenter(f'{UNDERLINE}{Fore.CYAN}Press {BOLD}↑ and ↓ arrow keys{END}{UNDERLINE}{Fore.CYAN} to go navigate through the menu{Fore.RESET}{END}'.center(terminal_size))
         print()
         print()
 
@@ -127,8 +136,8 @@ def main():
         elif i == b'\r':
             if current_choice == 1:
                 os.system('cls')
-                print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                 print('-' * terminal_size)
                 print()
                 task = input(f'{Fore.LIGHTBLUE_EX}{BOLD}{UNDERLINE}Enter the task{END}:{Fore.RESET} {Fore.LIGHTCYAN_EX}')
@@ -138,11 +147,11 @@ def main():
                 while True:
                     os.system('cls')
                     task_list = []
-                    print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                    print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                     print('-' * terminal_size)
                     print()
-                    print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
                     print()
                     for i in list_tasks():
                         task_list.append(i[1])
@@ -172,22 +181,22 @@ def main():
                         break
             if current_choice == 6:
                 os.system('cls')
-                print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                 print('-' * terminal_size)
                 print()
-                print(f"{Fore.LIGHTRED_EX}{BOLD}Exiting out of PyOrganize...{END}{Fore.RESET}".center(terminal_size))
+                printCenter(f"{Fore.LIGHTRED_EX}{BOLD}Exiting out of PyOrganize...{END}{Fore.RESET}".center(terminal_size))
                 break
             if current_choice == 3:
                 tasks_pointer = 1
                 while True:
                     os.system('cls')
                     task_list = []
-                    print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                    print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                     print('-' * terminal_size)
                     print()
-                    print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
                     print()
                     for i in list_tasks():
                         task_list.append(i[1])
@@ -218,14 +227,14 @@ def main():
                 tasks_pointer = 1
                 while True:
                     os.system('cls')
-                    print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                    print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
-                    print('-' * terminal_size)
+                    printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    printCenter('-' * terminal_size)
                     print()
-                    print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
                     print()
                     if (pending_tasks() == []):
-                        print(f"{Fore.LIGHTRED_EX}{BOLD}There are currently no pending tasks!{END}{Fore.RESET}".center(terminal_size))
+                        printCenter(f"{Fore.LIGHTRED_EX}{BOLD}There are currently no pending tasks!{END}{Fore.RESET}".center(terminal_size))
                         getch()
                         break
                     else:
@@ -258,17 +267,17 @@ def main():
                             break
                         elif i == b'\x1b':
                             break
-                if current_choice == 4:
-                    os.system('cls')
-                    print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                    print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
-                    print('-' * terminal_size)
-                    print()
-                    print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
-                    print()
-                    display_tasks()
-                    print()
-                    getch()
+            if current_choice == 4:
+                os.system('cls')
+                printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                print('-' * terminal_size)
+                print()
+                printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                print()
+                display_tasks()
+                print()
+                getch()
 
 
 
