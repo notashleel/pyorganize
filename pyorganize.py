@@ -11,6 +11,31 @@ def initialize_database():
     conn.commit()
     conn.close()
 
+def pending_tasks():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM tasks WHERE status = ?', ('Pending',))
+    tasks = cursor.fetchall()
+    conn.close()
+    return tasks
+
+def tasks_done():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(id) FROM tasks WHERE status = ?', ('Done',))
+    tasks = cursor.fetchall()
+    conn.close()
+    return tasks
+
+
+def tasks_pending():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(id) FROM tasks WHERE status = ?', ('Pending',))
+    tasks = cursor.fetchall()
+    conn.close()
+    return tasks
+
 def add_task(task):
     conn = sqlite3.connect('todo.db')
     cursor = conn.cursor()
@@ -61,9 +86,22 @@ def main():
     while True:
         os.system('cls')
         terminal_size = shutil.get_terminal_size().columns
+        tasks_done_num = tasks_done()[0][0]
+        tasks_pending_num = tasks_pending()[0][0]
+        percentage = 0
+        if tasks_done_num + tasks_pending_num != 0:
+            percentage = (tasks_done_num / (tasks_done_num + tasks_pending_num)) * 100
+        progress_bar = "█" * int(percentage / 2)
+        progress_bar = f'{Fore.LIGHTBLUE_EX}{progress_bar}{Fore.RESET}'
+        progress_bar += " " * (50 - int(percentage / 2))
         print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
         print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
         print('-' * terminal_size)
+        print()
+        print(f'{BOLD}Progress:{END} |{progress_bar}| {percentage}%'.center(terminal_size))
+        print()
+        print(f'{UNDERLINE}{Fore.CYAN}Press {BOLD}↑ and ↓ arrow keys{END}{UNDERLINE}{Fore.CYAN} to go navigate through the menu{Fore.RESET}{END}'.center(terminal_size))
+        print()
         print()
 
         menu_options = ["Add a new task", "Edit a prexisting task", "Delete a task", "List all current tasks", "Mark task as done", "Exit out of PyOrganize"
@@ -180,49 +218,57 @@ def main():
                 tasks_pointer = 1
                 while True:
                     os.system('cls')
-                    task_list = []
                     print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
                     print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                     print('-' * terminal_size)
                     print()
                     print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
                     print()
-                    for i in list_tasks():
-                        task_list.append(i[1])
-                    for task in task_list:
-                        if tasks_pointer == task_list.index(task) + 1:
-                            print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task}{END}")
-                        else:
-                            print(f"    {task}")
-                    i = getch()
-                    if (i==b'\xe0' or i == b'\x00'):
-                        j = getch()
-                        if(j==b'H'):
-                            tasks_pointer -= 1
-                        elif(j==b'P'):
-                            tasks_pointer += 1
-                        if(tasks_pointer < 1):
-                            tasks_pointer = 1
-                        if(tasks_pointer > len(task_list)):
-                            tasks_pointer = len(task_list)
-                    elif i == b'\r':
-                        os.system('cls')
-                        task_id = list_tasks()[tasks_pointer - 1][0]
-                        mark_task_as_done(task_id)
+                    if (pending_tasks() == []):
+                        print(f"{Fore.LIGHTRED_EX}{BOLD}There are currently no pending tasks!{END}{Fore.RESET}".center(terminal_size))
+                        getch()
                         break
-                    elif i == b'\x1b':
-                        break
-            if current_choice == 4:
-                os.system('cls')
-                print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
-                print('-' * terminal_size)
-                print()
-                print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
-                print()
-                display_tasks()
-                print()
-                getch()
+                    else:
+                        id_list = []
+                        name_list = []
+                        pending_tasks_list = pending_tasks()
+                        for task in pending_tasks_list:
+                            id_list.append(task[0])
+                            name_list.append(task[1])
+                        for task in name_list:
+                            if tasks_pointer == name_list.index(task) + 1:
+                                print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task}{END}")
+                            else:
+                                print(f"    {task}")
+                        i = getch()
+                        if (i==b'\xe0' or i == b'\x00'):
+                            j = getch()
+                            if(j==b'H'):
+                                tasks_pointer -= 1
+                            elif(j==b'P'):
+                                tasks_pointer += 1
+                            if(tasks_pointer < 1):
+                                tasks_pointer = 1
+                            if(tasks_pointer > len(name_list)):
+                                tasks_pointer = len(name_list)
+                        elif i == b'\r':
+                            os.system('cls')
+                            task_id = id_list[tasks_pointer - 1]
+                            mark_task_as_done(task_id)
+                            break
+                        elif i == b'\x1b':
+                            break
+                if current_choice == 4:
+                    os.system('cls')
+                    print(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    print(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    print('-' * terminal_size)
+                    print()
+                    print(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    print()
+                    display_tasks()
+                    print()
+                    getch()
 
 
 
