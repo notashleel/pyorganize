@@ -140,8 +140,11 @@ def main():
                 printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                 print('-' * terminal_size)
                 print()
+                printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ENTER{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                print()
                 task = input(f'{Fore.LIGHTBLUE_EX}{BOLD}{UNDERLINE}Enter the task{END}:{Fore.RESET} {Fore.LIGHTCYAN_EX}')
-                add_task(task)
+                if task != '':
+                    add_task(task)
             if current_choice == 2:
                 tasks_pointer = 1
                 while True:
@@ -155,11 +158,11 @@ def main():
                     print()
                     for i in list_tasks():
                         task_list.append(i[1])
-                    for task in task_list:
-                        if tasks_pointer == task_list.index(task) + 1:
-                            print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task}{END}")
+                    for task in range(len(task_list)):
+                        if tasks_pointer == task + 1:
+                            print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task_list[task]}{END}")
                         else:
-                            print(f"    {task}")
+                            print(f"    {task_list[task]}")
                     i = getch()
                     if (i==b'\xe0' or i == b'\x00'):
                         j = getch()
@@ -200,11 +203,11 @@ def main():
                     print()
                     for i in list_tasks():
                         task_list.append(i[1])
-                    for task in task_list:
-                        if tasks_pointer == task_list.index(task) + 1:
-                            print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task}{END}")
+                    for task in range(len(task_list)):
+                        if tasks_pointer == task + 1:
+                            print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task_list[task]}{END}")
                         else:
-                            print(f"    {task}")
+                            print(f"    {task_list[task]}")
                     i = getch()
                     if (i==b'\xe0' or i == b'\x00'):
                         j = getch()
@@ -235,8 +238,11 @@ def main():
                     print()
                     if (pending_tasks() == []):
                         printCenter(f"{Fore.LIGHTRED_EX}{BOLD}There are currently no pending tasks!{END}{Fore.RESET}".center(terminal_size))
-                        getch()
-                        break
+                        i = getch()
+                        if i == b'\x1b':
+                            break
+                        else:
+                            continue
                     else:
                         id_list = []
                         name_list = []
@@ -244,11 +250,11 @@ def main():
                         for task in pending_tasks_list:
                             id_list.append(task[0])
                             name_list.append(task[1])
-                        for task in name_list:
-                            if tasks_pointer == name_list.index(task) + 1:
-                                print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{task}{END}")
+                        for task in range(len(name_list)):
+                            if tasks_pointer == task + 1:
+                                print(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{name_list[task]}{END}")
                             else:
-                                print(f"    {task}")
+                                print(f"    {name_list[task]}")
                         i = getch()
                         if (i==b'\xe0' or i == b'\x00'):
                             j = getch()
@@ -268,16 +274,21 @@ def main():
                         elif i == b'\x1b':
                             break
             if current_choice == 4:
-                os.system('cls')
-                printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
-                printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
-                print('-' * terminal_size)
-                print()
-                printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
-                print()
-                display_tasks()
-                print()
-                getch()
+                while True:
+                    os.system('cls')
+                    printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    print('-' * terminal_size)
+                    print()
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    print()
+                    display_tasks()
+                    print()
+                    i = getch()
+                    if i == b'\x1b':
+                        break
+                    else:
+                        continue
 
 
 
