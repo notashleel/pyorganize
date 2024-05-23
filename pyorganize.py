@@ -4,6 +4,7 @@ import shutil
 from colorama import Fore, Style
 from msvcrt import getch
 import re
+from prettytable import PrettyTable
 
 def initialize_database():
     conn = sqlite3.connect('todo.db')
@@ -28,6 +29,49 @@ def tasks_done():
     conn.close()
     return tasks
 
+def list_all_tasks():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM tasks ORDER BY status DESC')
+    tasks = cursor.fetchall()
+    conn.close()
+    table = PrettyTable()
+    table.field_names = ["ID", "Task"]
+    for i in tasks:
+        table.add_row([i[0], i[1]])
+    i = table.get_string()
+    for j in i.split('\n'):
+        printCenter(j)
+
+def list_pending_tasks():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM tasks WHERE status = ?', ('Pending',))
+    tasks = cursor.fetchall()
+    conn.close()
+    table = PrettyTable()
+    table.field_names = ["ID", "Task"]
+    for i in tasks:
+        table.add_row([i[0], i[1]])
+    i = table.get_string()
+    for j in i.split('\n'):
+        printCenter(j)
+
+def list_done_tasks():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM tasks WHERE status = ?', ('Done',))
+    tasks = cursor.fetchall()
+    conn.close()
+    table = PrettyTable()
+    table.field_names = ["ID", "Task"]
+    for i in tasks:
+        table.add_row([i[0], i[1]])
+    i = table.get_string()
+    for j in i.split('\n'):
+        printCenter(j)
+        
+        
 
 def tasks_pending():
     conn = sqlite3.connect('todo.db')
@@ -274,21 +318,50 @@ def main():
                         elif i == b'\x1b':
                             break
             if current_choice == 4:
+                category_pointer = 0
                 while True:
                     os.system('cls')
                     printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
                     printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
                     print('-' * terminal_size)
                     print()
-                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}←, → and ESC{END}{UNDERLINE}{Fore.RED} keys to navigate through this menu{Fore.RESET}{END}'.center(terminal_size))
                     print()
-                    display_tasks()
-                    print()
+                    categories = ["All tasks", "Pending tasks", "Done tasks"]
+                    for category in range(len(categories)):
+                        if category == category_pointer:
+                            categories[category_pointer] = f"{Fore.LIGHTBLUE_EX}{BOLD}{UNDERLINE}{categories[category]}{END}"
+                    header = ''
+                    for i in range(len(categories)):
+                        if i == len(categories) - 1:
+                            header += categories[i]
+                        else:
+                            header += categories[i] + " | "
+                    printCenter(header)
+                    if (category_pointer==0):
+                        print()
+                        list_all_tasks()
+                    elif (category_pointer==1):
+                        print()
+                        list_pending_tasks()
+                    elif (category_pointer==2):
+                        print()
+                        list_done_tasks()
                     i = getch()
-                    if i == b'\x1b':
+                    if (i==b'\xe0' or i == b'\x00'):
+                        j = getch()
+                        if(j==b'K'):
+                            category_pointer -= 1
+                        elif(j==b'M'):
+                            category_pointer += 1
+                        if(category_pointer < 0):
+                            category_pointer = 0
+                        if(category_pointer > len(categories) - 1):
+                            category_pointer = len(categories) - 1
+                    elif i == b'\x1b':
                         break
-                    else:
-                        continue
+
+
 
 
 

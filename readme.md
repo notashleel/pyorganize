@@ -18,6 +18,7 @@
 3. Install the required libraries using pip:
     ```sh
     pip install colorama
+    pip install prettytable
     ```
 
 ## Usage
@@ -59,5 +60,3 @@ def initialize_database():
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ---
-
-Feel free to adjust any part of this README to better fit your specific needs or preferences!
