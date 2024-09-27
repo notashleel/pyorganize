@@ -5,6 +5,7 @@ from colorama import Fore, Style
 from msvcrt import getch
 import re
 from prettytable import PrettyTable
+from term_piechart import Pie
 
 def initialize_database():
     conn = sqlite3.connect('todo.db')
@@ -157,7 +158,7 @@ def main():
         print()
         print()
 
-        menu_options = ["Add a new task", "Edit a prexisting task", "Delete a task", "List all current tasks", "Mark task as done", "Exit out of PyOrganize"
+        menu_options = ["Add a new task", "Edit a prexisting task", "Delete a task", "List all current tasks", "Visualize your progress", "Mark task as done", "Exit out of PyOrganize"
         ]
         
         for option in menu_options:
@@ -175,8 +176,8 @@ def main():
                 current_choice += 1
             if(current_choice < 1):
                 current_choice = 1
-            if(current_choice > 6):
-                current_choice = 6
+            if(current_choice > 7):
+                current_choice = 7
         elif i == b'\r':
             if current_choice == 1:
                 os.system('cls')
@@ -226,7 +227,7 @@ def main():
                         break
                     elif i == b'\x1b':
                         break
-            if current_choice == 6:
+            if current_choice == 7:
                 os.system('cls')
                 printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
                 printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
@@ -270,7 +271,7 @@ def main():
                         break
                     elif i == b'\x1b':
                         break
-            if current_choice == 5:
+            if current_choice == 6:
                 tasks_pointer = 1
                 while True:
                     os.system('cls')
@@ -359,7 +360,31 @@ def main():
                         if(category_pointer > len(categories) - 1):
                             category_pointer = len(categories) - 1
                     elif i == b'\x1b':
-                        break
+                        break   
+            if current_choice == 5:
+                while True:
+                    os.system('cls')
+                    printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                    printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                    print('-' * terminal_size)
+                    print()
+                    printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
+                    print()
+                    tasks_done_num = tasks_done()[0][0]
+                    tasks_pending_num = tasks_pending()[0][0]
+                    requests = [
+                        {"name": "Completed", "value": tasks_done_num, "color": "cyan"},
+                        {"name": "Pending", "value": tasks_pending_num, "color": "grey"},
+                    ]
+                    pie = Pie(
+                    requests,
+                    radius=5,
+                    legend={"line": 0, "format": "{label} {name} {percent:>5.2f}%"},
+                    )
+                    print(pie)
+                    i = getch()
+                    if i == b'\x1b':
+                        break   
 
 
 
