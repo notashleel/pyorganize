@@ -77,6 +77,8 @@ def overall_done_percentage():
     cursor = conn.cursor()
     cursor.execute('SELECT SUM(done_percentage) FROM tasks')
     sum = cursor.fetchall()[0][0]
+    if sum == None:
+        return 0
     cursor.execute('SELECT COUNT(id) FROM tasks')
     count = cursor.fetchall()[0][0]
     conn.close()
