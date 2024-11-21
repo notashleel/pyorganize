@@ -10,7 +10,7 @@ from term_piechart import Pie
 def initialize_database():
     conn = sqlite3.connect('todo.db')
     cursor = conn.cursor()
-    cursor.execute('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT, status TEXT)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT, status TEXT, done_percentage INTEGER)')
     conn.commit()
     conn.close()
 
@@ -37,9 +37,9 @@ def list_all_tasks():
     tasks = cursor.fetchall()
     conn.close()
     table = PrettyTable()
-    table.field_names = ["ID", "Task"]
+    table.field_names = ["ID", "Task", "Progress"]
     for i in tasks:
-        table.add_row([i[0], i[1]])
+        table.add_row([i[0], i[1], str(i[3]) + '%'])
     i = table.get_string()
     for j in i.split('\n'):
         printCenter(j)
@@ -51,9 +51,9 @@ def list_pending_tasks():
     tasks = cursor.fetchall()
     conn.close()
     table = PrettyTable()
-    table.field_names = ["ID", "Task"]
+    table.field_names = ["ID", "Task", "Progress"]
     for i in tasks:
-        table.add_row([i[0], i[1]])
+        table.add_row([i[0], i[1], str(i[3]) + '%'])
     i = table.get_string()
     for j in i.split('\n'):
         printCenter(j)
@@ -72,7 +72,17 @@ def list_done_tasks():
     for j in i.split('\n'):
         printCenter(j)
         
-        
+def overall_done_percentage():
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT SUM(done_percentage) FROM tasks')
+    sum = cursor.fetchall()[0][0]
+    cursor.execute('SELECT COUNT(id) FROM tasks')
+    count = cursor.fetchall()[0][0]
+    conn.close()
+    return sum / count
+
+
 
 def tasks_pending():
     conn = sqlite3.connect('todo.db')
@@ -85,7 +95,7 @@ def tasks_pending():
 def add_task(task):
     conn = sqlite3.connect('todo.db')
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO tasks (task, status) VALUES (?, ?)', (task, 'Pending'))
+    cursor.execute('INSERT INTO tasks (task, status, done_percentage) VALUES (?, ?, 0)', (task, 'Pending'))
     conn.commit()
     conn.close()
 
@@ -111,10 +121,21 @@ def list_tasks():
     conn.close()
     return tasks
 
-def mark_task_as_done(task_id):
+def get_task_percentage(task_id):
     conn = sqlite3.connect('todo.db')
     cursor = conn.cursor()
-    cursor.execute('UPDATE tasks SET status = ? WHERE id = ?', ('Done', task_id))
+    cursor.execute('SELECT done_percentage FROM tasks WHERE id = ?', (task_id,))
+    percentage = cursor.fetchone()
+    conn.close()
+    return percentage
+
+def mark_task_as_done(task_id, percentage):
+    conn = sqlite3.connect('todo.db')
+    cursor = conn.cursor()
+    if percentage == 100:
+        cursor.execute('UPDATE tasks SET status = ?, done_percentage = ? WHERE id = ?', ('Done', percentage,  task_id))
+    else:
+        cursor.execute('UPDATE tasks SET status = ?, done_percentage = ? WHERE id = ?', ('Pending', percentage,  task_id))
     conn.commit()
     conn.close()
 
@@ -140,11 +161,7 @@ def main():
     while True:
         os.system('cls')
         terminal_size = shutil.get_terminal_size().columns
-        tasks_done_num = tasks_done()[0][0]
-        tasks_pending_num = tasks_pending()[0][0]
-        percentage = 0
-        if tasks_done_num + tasks_pending_num != 0:
-            percentage = (tasks_done_num / (tasks_done_num + tasks_pending_num)) * 100
+        percentage = overall_done_percentage()
         progress_bar = "█" * int(percentage / 2)
         progress_bar = f'{Fore.LIGHTBLUE_EX}{progress_bar}{Fore.RESET}'
         progress_bar += " " * (50 - int(percentage / 2))
@@ -158,8 +175,7 @@ def main():
         print()
         print()
 
-        menu_options = ["Add a new task", "Edit a prexisting task", "Delete a task", "List all current tasks", "Visualize your progress", "Mark task as done", "Exit out of PyOrganize"
-        ]
+        menu_options = ["Add a new task", "Edit a prexisting task", "Delete a task", "List all current tasks", "Visualize your progress", "Mark task as done", "Exit out of PyOrganize"]
         
         for option in menu_options:
             if current_choice == menu_options.index(option) + 1:
@@ -312,10 +328,44 @@ def main():
                             if(tasks_pointer > len(name_list)):
                                 tasks_pointer = len(name_list)
                         elif i == b'\r':
-                            os.system('cls')
-                            task_id = id_list[tasks_pointer - 1]
-                            mark_task_as_done(task_id)
-                            break
+                            percentage_pointer = 0
+                            while True:
+                                os.system('cls')
+                                task_id = id_list[tasks_pointer - 1]
+                                printCenter(f"{Fore.CYAN}Py{Style.BRIGHT}{Fore.BLUE}Organize{Style.RESET_ALL}".center(terminal_size))
+                                printCenter(f"{Style.DIM}{Fore.CYAN}A user-friendly Python app to organize, track, and manage your to-do lists efficiently!{Style.RESET_ALL}".center(terminal_size))
+                                printCenter('-' * terminal_size)
+                                print()
+                                printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}↑, ↓ and ESC{END}{UNDERLINE}{Fore.RED} keys to navigate through this menu{Fore.RESET}{END}'.center(terminal_size))
+                                print()
+                                percentages = range(100, get_task_percentage(task_id)[0], -10)
+                                
+                                for i in range(len(percentages)):
+                                    if i == percentage_pointer:
+                                        printCenter(f"{Fore.LIGHTBLUE_EX}>> {BOLD}{UNDERLINE}{percentages[i]}%{END}")
+                                    else:
+                                        printCenter(f"    {percentages[i]}")
+                                i = getch()
+                                
+                                print(percentage_pointer)
+                                if (i==b'\xe0' or i == b'\x00'):
+                                    j = getch()
+                                    if(j==b'H'):
+                                        percentage_pointer -= 1
+                                    elif(j==b'P'):
+                                        percentage_pointer += 1
+                                    if(percentage_pointer < 0):
+                                        percentage_pointer = 0
+                                    if(percentage_pointer > len(percentages) - 1):
+                                        percentage_pointer = len(percentages) - 1
+                                elif i == b'\r':
+                                    mark_task_as_done(task_id, percentages[percentage_pointer])
+                                    break
+                                elif i == b'\x1b':
+                                    break
+
+
+
                         elif i == b'\x1b':
                             break
             if current_choice == 4:
@@ -370,11 +420,11 @@ def main():
                     print()
                     printCenter(f'{UNDERLINE}{Fore.RED}Press {BOLD}ESC{END}{UNDERLINE}{Fore.RED} to go back{Fore.RESET}{END}'.center(terminal_size))
                     print()
-                    tasks_done_num = tasks_done()[0][0]
-                    tasks_pending_num = tasks_pending()[0][0]
+                    task_done = overall_done_percentage()
+                    task_left = 100 - task_done
                     requests = [
-                        {"name": "Completed", "value": tasks_done_num, "color": "cyan"},
-                        {"name": "Pending", "value": tasks_pending_num, "color": "grey"},
+                        {"name": "Completed", "value": task_done, "color": "cyan"},
+                        {"name": "Pending", "value": task_left, "color": "grey"},
                     ]
                     pie = Pie(
                     requests,
@@ -385,11 +435,6 @@ def main():
                     i = getch()
                     if i == b'\x1b':
                         break   
-
-
-
-
-
 
 
 if __name__ == "__main__":
